@@ -1,4 +1,4 @@
-# 🚀 Multi-Tier Ansible Lab
+# Multi-Tier Ansible Lab
 
 A simulated 3-tier infrastructure — **load balancer → web servers → database** —
 fully provisioned, configured, and secured with **Ansible**, running on **Docker
