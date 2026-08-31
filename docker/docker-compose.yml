@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  lb01:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: lb01
+    hostname: lb01
+    networks:
+      - lab-net
+    ports:
+      - "2223:22"
+      - "8080:80"
+
+  web01:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: web01
+    hostname: web01
+    networks:
+      - lab-net
+    ports:
+      - "2221:22"
+      - "8081:80"
+
+  web02:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: web02
+    hostname: web02
+    networks:
+      - lab-net
+    ports:
+      - "2222:22"
+      - "8082:80"
+
+  db01:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: db01
+    hostname: db01
+    networks:
+      - lab-net
+    ports:
+      - "2224:22"
+
+networks:
+  lab-net:
+    driver: bridge

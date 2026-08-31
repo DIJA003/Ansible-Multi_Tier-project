@@ -1,0 +1,23 @@
+- name: Applay common configuration to all hosts
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Configure database servers
+  hosts: db
+  become: true
+  roles:
+    - database
+
+- name: Configure web servers
+  hosts: web
+  become: true
+  roles:
+    - webserver
+
+- name: Configure load balancer
+  hosts: lb
+  become: true
+  roles:
+    - loadbalancer

@@ -1,0 +1,55 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/database
+- name: Load vaulted secrets
+  include_vars:
+    file: secrets.yml
+
+- name: Install MySQL server and Python connector
+  apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+- name: Ensure MySQL is running
+  service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Get debian-sys-maint credentials
+  slurp:
+    src: /etc/mysql/debian.cnf
+  register: debian_cnf_raw
+
+- name: Extract debian-sys-maint password
+  set_fact:
+    debian_sys_maint_password: "{{ (debian_cnf_raw.content | b64decode) | regex_search('password\\s*=\\s*(.+)', '\\1') | first }}"
+
+- name: Set MySQL root password using debian-sys-maint account
+  community.mysql.mysql_user:
+    name: root
+    host: localhost
+    password: "{{ db_root_password }}"
+    login_user: debian-sys-maint
+    login_password: "{{ debian_sys_maint_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Create application database
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+
+- name: Create application database user 
+  community.mysql.mysql_user:
+    name: "{{ db_app_user }}"
+    password: "{{ db_app_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    state: present

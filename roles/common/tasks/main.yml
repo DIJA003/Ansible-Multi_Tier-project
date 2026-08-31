@@ -1,0 +1,42 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/common
+
+- name: Load vaulted secrets
+  include_vars:
+    file: secrets.yml
+    
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3700
+
+- name: Install base packages
+  apt:
+    name:
+      - vim
+      - curl
+      - ufw
+      - net-tools
+    state: present
+
+- name: Create a non-root sudo user
+  user:
+    name: "{{ deploy_user }}"
+    groups: sudo
+    shell: /bin/bash
+    create_home: yes
+    password: "{{ deploy_user_password | password_hash('sha512') }}"
+  
+- name: Allow SSH through firewall
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+  when: enable_firewall
+
+- name: Enable firewall
+  ufw:
+    state: enabled
+    policy: deny
+  when: enable_firewall
